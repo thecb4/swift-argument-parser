@@ -5,11 +5,14 @@ import PackageDescription
 
 let package = Package(
     name: "swift-argument-parser",
+    platforms: [
+        .macOS(.v10_10), .iOS(.v9),
+    ],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
-            name: "swift-argument-parser",
-            targets: ["swift-argument-parser"]),
+            name: "ArgumentParserKit",
+            targets: ["ArgumentParserKit"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -19,10 +22,35 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
-            name: "swift-argument-parser",
+            name: "ArgumentParserKit",
+            dependencies: ["Libc","APUtility"]),
+        
+        .target(
+            /** Shim target to import missing C headers in Darwin and Glibc modulemap. */
+            name: "APUtility",
+            dependencies: ["Libc"]),
+        
+        .target(
+            /** Shim target to import missing C headers in Darwin and Glibc modulemap. */
+            name: "clibc",
             dependencies: []),
+        .target(
+            /** Cross-platform access to bare `libc` functionality. */
+            name: "Libc",
+            dependencies: ["clibc"]),
+        
+        .target(
+            /** Generic test support library */
+            name: "TestSupport",
+            dependencies: ["APUtility"]),
+        .target(
+            /** Test support executable */
+            name: "TestSupportExecutable",
+            dependencies: ["APUtility", "ArgumentParserKit"]),
+        
+        
         .testTarget(
             name: "swift-argument-parserTests",
-            dependencies: ["swift-argument-parser"]),
+            dependencies: ["ArgumentParserKit", "TestSupport", "TestSupportExecutable"]),
     ]
 )
